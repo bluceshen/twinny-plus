@@ -40,6 +40,7 @@ import styles from "./styles/index.module.css"
 
 import { EmbeddingDatabase } from "../extention/embeding_func/embeddings"
 import { vsCodeBadge } from "@vscode/webview-ui-toolkit"
+import { crawler } from "./crawler"
 
 interface ChatProps {
   fullScreen?: boolean
@@ -284,9 +285,17 @@ export const Chat = (props: ChatProps): JSX.Element => {
     // 模拟网络请求延迟
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Fetching web data for query:", query);
-    
+
+    const data: Array<String>  = await crawler.searchAndScrape(query) || [];
+    let retContent = [];
+    for(let i=0;i<data.length;i++){
+      retContent.push(`Web data 1 for: ${data[i]}`);
+    }
+
+    retContent.slice(0, 4); // 只保留前3条数据
+    console.log("retContent[0]: ", retContent[0]);   
     // 返回模拟的Web数据数组
-    return [`Web data 1 for: ${query}`, `Web data 2 for: ${query}`];
+    return retContent;
   };
 
   const handleSubmitForm = useCallback(async () => {
@@ -318,6 +327,7 @@ export const Chat = (props: ChatProps): JSX.Element => {
   // 如果RAG复选框被选中，则执行爬虫操作
     if (isRAGEnabled) {
       try {
+        console.log("Fetched web data...");
         webData = await fetchDataFromWeb(text); // 调用爬虫函数
         console.log("Fetched web data:", webData);
 
